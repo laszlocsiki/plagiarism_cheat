@@ -53,10 +53,11 @@ public class DocumentHandle {
                     String line = lineFromFile;
                     outputWord = line.substring(line.indexOf(": ") + 2);
                     //System.out.println(synonim);
-                } else {
-                    String line = lineFromFile;
-                    outputWord = "test";
+                    return outputWord;
                 }
+            }
+            if(outputWord ==null){
+                outputWord="test";
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
