@@ -1,15 +1,21 @@
 package plagiarism;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFStyle;
+import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by lcssgml on 1/12/17.
@@ -33,8 +39,24 @@ public class DocumentHandle {
         }
     }
 
+    //smallInput function
+    private String smallInput(String fullWord){
+        String smallInput=null;
+        if(fullWord.length()<4){
+            smallInput=fullWord;
+        }else if((fullWord.length()>3) && (fullWord.length()<6)){
+            smallInput=fullWord.substring(0,fullWord.length()-1);
+        }else if((fullWord.length()>5) && (fullWord.length()<8)){
+            smallInput=fullWord.substring(0,fullWord.length()-2);
+        }else if(fullWord.length()>8){
+            smallInput=fullWord.substring(0,fullWord.length()-2);
+        }
+        //System.out.println(smallInput);
+        return smallInput;
+    }
+
     //change word
-    public String changeWord(String inputWord){
+    private String changeWord(String inputWord){
         String outputWord = null;
         //get first letter
         String firstLetter=getFirstLetters(inputWord);
@@ -48,7 +70,7 @@ public class DocumentHandle {
             int lineNum = 0;
             while (scanner.hasNextLine()) {
                 String lineFromFile = scanner.nextLine();
-                if (lineFromFile.contains(inputWord)) {
+                if (lineFromFile.contains(smallInput(inputWord))) {
                     //a match
                     String line = lineFromFile;
                     outputWord = line.substring(line.indexOf(": ") + 2);
@@ -57,7 +79,7 @@ public class DocumentHandle {
                 }
             }
             if(outputWord ==null){
-                outputWord="test";
+                outputWord=inputWord;
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -65,26 +87,34 @@ public class DocumentHandle {
         return outputWord;
     }
 
+    private String setTextColor(String word){
+        String coloredWord = null;
+        /**
+         * setColor method here
+         */
+        return coloredWord;
+    }
+
     //get the file which contains the synonyms
-    public String get_sin_file(String letter){
+    private String get_sin_file(String letter){
         String letterFilePath = null;
         File dir = new File("Java/Plagiarism/synonyms/");
         FileFilter fileFilter = new WildcardFileFilter("*_"+letter+".txt");
         File[] files = dir.listFiles(fileFilter);
         for (int i = 0; i < files.length; i++) {
             letterFilePath=files[i].getAbsolutePath();
-            System.out.println(letterFilePath);
+            //System.out.println(letterFilePath);
         }
         if(letterFilePath==null) {
             letterFilePath = "Java/Plagiarism/synonyms/litera_a.txt";
-            System.out.println("default file path -> file not found");
+           // System.out.println("default file path -> file not found");
         }
 
         return letterFilePath;
     }
 
     //get the first letter
-    public String getFirstLetters(String word) {
+    private String getFirstLetters(String word) {
         String firstLetters = "";
         word = word.replaceAll("[.,]", ""); // Replace dots, etc (optional)
         for(String s : word.split(" "))
@@ -95,7 +125,7 @@ public class DocumentHandle {
     }
 
     //rebuild the document
-    public void rebuildDocument(){
+    private void rebuildDocument(){
         try {
             this.doc.write(new FileOutputStream(this.outputFilePath));
             System.out.println("File saved to : "+this.outputFilePath);
@@ -110,6 +140,7 @@ public class DocumentHandle {
             List<XWPFRun> runs = p.getRuns();
             if (runs != null){
                 for (XWPFRun r :runs){
+                    r.setColor(String.valueOf(IndexedColors.RED.getIndex()));
                     String text = r.getText(0);
                     if(text != null) {
                         //find the fifth words
@@ -118,7 +149,6 @@ public class DocumentHandle {
                             System.out.print("original world: " + split[i]);
                             String currentWord = split[i];
                             System.out.println(" changed to: " + changeWord(currentWord));
-
                             text = text.replace(currentWord, changeWord(currentWord));
                         }
                         //rebuild text
@@ -132,3 +162,5 @@ public class DocumentHandle {
         rebuildDocument();
     }
 }
+
+//TODO: find thext between two quotes and skip that...
