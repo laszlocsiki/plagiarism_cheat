@@ -30,15 +30,15 @@ function dlPage($href) {
 }
 
 // Open the file
-$fp = @fopen('links/link_s.txt', 'r');
+$fp = @fopen('links/link_ss.txt', 'r');
 $array=array();
 // Add each line to an array
 
-$sp = fopen("sinonime/litera_s.txt","wb");
+$sp = fopen("sinonime/litera_ss.txt","wb");
 $content='';
 
 if ($fp) {
-    $array = explode("\n", fread($fp, filesize('links/link_s.txt')));
+    $array = explode("\n", fread($fp, filesize('links/link_ss.txt')));
 }
 $counter=1;
 foreach ($array as $link) {
