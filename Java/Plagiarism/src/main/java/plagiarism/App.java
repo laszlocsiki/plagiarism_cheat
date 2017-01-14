@@ -20,6 +20,8 @@ public class App {
          DocumentHandle documentHandle=new DocumentHandle(inputFile,outputFile);
          documentHandle.mainEngine();
 
+         //Checked with http://www.plagscan.com/plagiarism-check/
+         //and it's working! :D YEEE
 
         /*String letterFilePath = null;
         File dir = new File("Java/Plagiarism/synonyms/");
