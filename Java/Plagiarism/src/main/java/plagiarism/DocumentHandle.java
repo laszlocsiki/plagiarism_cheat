@@ -3,13 +3,17 @@ package plagiarism;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.omg.PortableInterceptor.INACTIVE;
+
 import java.io.*;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by lcssgml on 1/12/17.
@@ -42,51 +46,66 @@ public class DocumentHandle {
             smallInput=fullWord.substring(0,fullWord.length()-1);
         }else if((fullWord.length()>5) && (fullWord.length()<8)){
             smallInput=fullWord.substring(0,fullWord.length()-2);
-        }else if(fullWord.length()>8){
+        }else if(fullWord.length()>=8){
             smallInput=fullWord.substring(0,fullWord.length()-2);
         }
         //System.out.println(smallInput);
         return smallInput;
     }
 
+    //this function check the word, if is word then true, else false;
+    private boolean isWord(String inputWord){
+        Pattern pattern=Pattern.compile("[^a-z0-9]",Pattern.CASE_INSENSITIVE);
+        Matcher m= pattern.matcher(inputWord);
+        boolean ret = m.find();
+        //System.out.println(ret);
+        if(!ret)
+            return true;
+        else
+            return false;
+    }
+
     //change word
-    private String changeWord(String inputWord){
+    private String changeWord(String unformattedInput){
+        String inputWord=unformattedInput.replaceAll("[.,”]", "");
         String outputWord = null;
         //get first letter
         String firstLetter=getFirstLetters(inputWord);
         //get file which contains synonyms
-        String filePath=get_sin_file(firstLetter);
+        if(firstLetter != null) {
+            String filePath = get_sin_file(firstLetter);
+            File file = new File(filePath);
 
-        File file = new File(filePath);
-        try {
-            Scanner scanner = new Scanner(file);
-            //read the file line by line
-            int lineNum = 0;
-            while (scanner.hasNextLine()) {
-                String lineFromFile = scanner.nextLine();
-                if (lineFromFile.contains(smallInput(inputWord))) {
-                    //a match
-                    String line = lineFromFile;
-                    outputWord = line.substring(line.indexOf(": ") + 2);
-                    //System.out.println(synonim);
-                    return outputWord;
+            if (inputWord.length() < 3){
+                return inputWord;
+            }else{
+                try {
+                    Scanner scanner = new Scanner(file);
+                    //read the file line by line
+                    int lineNum = 0;
+                    while (scanner.hasNextLine()) {
+                        String lineFromFile = scanner.nextLine();
+                        String[] splitLine = lineFromFile.split(" ");
+                        if (splitLine[0].contains(smallInput(inputWord))) {
+                            //a match
+                            String line = lineFromFile;
+                            outputWord = "["+inputWord+" -> "+line.substring(line.indexOf(": ") + 2)+"]";
+                            //System.out.println(synonim);
+                            return outputWord;
+                        }
+                    }
+                    if (outputWord == null) {
+                        outputWord = "[Change this -> "+inputWord+"]";
+                    }
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
                 }
             }
-            if(outputWord ==null){
-                outputWord=inputWord;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        }else{
+            outputWord = "[Change this -> "+inputWord+"]";
         }
         return outputWord;
-    }
-
-    private String setTextColor(String word){
-        String coloredWord = null;
-        /**
-         * setColor method here
-         */
-        return coloredWord;
+        //TODO:this method remove the special characters, resolve this bug!
     }
 
     //get the file which contains the synonyms
@@ -97,11 +116,11 @@ public class DocumentHandle {
         File[] files = dir.listFiles(fileFilter);
         for (int i = 0; i < files.length; i++) {
             letterFilePath=files[i].getAbsolutePath();
-            //System.out.println(letterFilePath);
+           // System.out.println(letterFilePath);
         }
         if(letterFilePath==null) {
             letterFilePath = "Java/Plagiarism/synonyms/litera_a.txt";
-           // System.out.println("default file path -> file not found");
+            //System.out.println("default file path -> file not found");
         }
 
         return letterFilePath;
@@ -110,10 +129,14 @@ public class DocumentHandle {
     //get the first letter
     private String getFirstLetters(String word) {
         String firstLetters = "";
-        word = word.replaceAll("[.,]", ""); // Replace dots, etc (optional)
-        for(String s : word.split(" "))
-        {
-            firstLetters += s.charAt(0);
+        word = word.replaceAll("[.,-]", ""); // Replace dots, etc (optional)
+        if(word.equals("")){
+            return null;
+        }else{
+            for(String s : word.split(" "))
+            {
+                firstLetters += s.charAt(0);
+            }
         }
         return firstLetters;
     }
@@ -134,7 +157,7 @@ public class DocumentHandle {
             List<XWPFRun> runs = p.getRuns();
             if (runs != null){
                 for (XWPFRun r :runs){
-                    r.setColor(String.valueOf(IndexedColors.RED.getIndex()));
+                    //r.setColor(String.valueOf(IndexedColors.RED.getIndex()));
                     String text = r.getText(0);
                     if(text != null) {
                         //find the fifth words
@@ -144,8 +167,10 @@ public class DocumentHandle {
                             String currentWord = split[i];
                             System.out.println(" changed to: " + changeWord(currentWord));
                             text = text.replace(currentWord, changeWord(currentWord));
+                            //TODO: create a function witch return a RUN which contain the formatted text
                         }
                         //rebuild text
+                        //System.out.println("COLOR:"+r.getColor());
                         r.setText(text, 0);
                     }
                 }
