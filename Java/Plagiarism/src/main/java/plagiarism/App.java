@@ -1,18 +1,5 @@
 package plagiarism;
 
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-/**
- * Hello world!
- *
- */
 public class App {
     public static void main(String[] args) {
          String inputFile="/home/lcssgml/IdeaProjects/plagiarism_cheat/Java/Plagiarism/Docs/input1.docx";

@@ -3,12 +3,9 @@ package plagiarism;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.omg.PortableInterceptor.INACTIVE;
-
 import java.io.*;
 import java.util.List;
 import java.util.Scanner;
@@ -20,9 +17,9 @@ import java.util.regex.Pattern;
  */
 public class DocumentHandle {
 
-    public String inputFilePath;
-    public String outputFilePath;
-    public XWPFDocument doc;
+    private String inputFilePath;
+    private String outputFilePath;
+    private XWPFDocument doc;
 
     //constructor
     public DocumentHandle(String inputFilePath, String outputFilePath) {
@@ -152,7 +149,10 @@ public class DocumentHandle {
 
     }
 
-    public void mainEngine(){
+    public StringBuilder mainEngine(){
+        StringBuilder returnString = new StringBuilder();
+        int counter=1;
+
         for(XWPFParagraph p : this.doc.getParagraphs()){
             List<XWPFRun> runs = p.getRuns();
             if (runs != null){
@@ -165,9 +165,11 @@ public class DocumentHandle {
                         for (int i = 4; i < split.length; i = i + 5) {
                             System.out.print("original world: " + split[i]);
                             String currentWord = split[i];
-                            System.out.println(" changed to: " + changeWord(currentWord));
+                            returnString.append(counter + ". Original world: "+currentWord);
+                            returnString.append(" changed to: " + changeWord(currentWord)+"\n");
                             text = text.replace(currentWord, changeWord(currentWord));
                             //TODO: create a function witch return a RUN which contain the formatted text
+                            counter++;
                         }
                         //rebuild text
                         //System.out.println("COLOR:"+r.getColor());
@@ -179,6 +181,7 @@ public class DocumentHandle {
         System.out.println("Main engine done");
         //rebuild doc (save)
         rebuildDocument();
+        return returnString;
     }
 }
 
