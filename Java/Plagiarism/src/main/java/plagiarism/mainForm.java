@@ -13,7 +13,7 @@ public class mainForm {
     private JButton convertButton;
     private JTextField outputField;
     private JTextField inputField;
-    private JPanel panelMain;
+    public JPanel panelMain;
     private JButton openButton;
     private JScrollPane jscroll;
     DocumentHandle documentHandle;
@@ -21,12 +21,6 @@ public class mainForm {
     private String outputPath;
 
     public mainForm() {
-        ///Display=new JTextArea();
-        //jscroll=new JScrollPane(Display);
-        //panelMain.add(jscroll);
-       // inputField.setText("/home/lcssgml/IdeaProjects/plagiarism_cheat/Java/Plagiarism/Docs/input1.docx");
-       // outputField.setText("/home/lcssgml/IdeaProjects/plagiarism_cheat/Java/Plagiarism/Docs/output1.docx");
-
         openButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 JFileChooser fileChooser = new JFileChooser();
@@ -56,11 +50,4 @@ public class mainForm {
         });
     }
 
-    public static void main(String[] args) {
-        JFrame frame=new JFrame("Plagiarism avoider");
-        frame.setContentPane(new mainForm().panelMain);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600,600);
-        frame.setVisible(true);
-    }
 }
