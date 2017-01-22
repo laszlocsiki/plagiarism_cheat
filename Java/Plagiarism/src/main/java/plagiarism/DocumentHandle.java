@@ -71,15 +71,19 @@ public class DocumentHandle {
         //get file which contains synonyms
         if(firstLetter != null) {
             String filePath = get_sin_file(firstLetter);
+            if(filePath==null){
+                outputWord = "[Change this -> "+unformattedInput+"]";
+                return outputWord;
+            }
+
             File file = new File(filePath);
 
-            if (inputWord.length() < 3){
+            if (inputWord.length() < 4){
                 return inputWord;
             }else{
                 try {
                     Scanner scanner = new Scanner(file);
                     //read the file line by line
-                    int lineNum = 0;
                     while (scanner.hasNextLine()) {
                         String lineFromFile = scanner.nextLine();
                         String[] splitLine = lineFromFile.split(" ");
@@ -92,7 +96,7 @@ public class DocumentHandle {
                         }
                     }
                     if (outputWord == null) {
-                        outputWord = "[Change this -> "+inputWord+"]";
+                        outputWord = "[Change this -> "+unformattedInput+"]";
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -116,8 +120,9 @@ public class DocumentHandle {
            // System.out.println(letterFilePath);
         }
         if(letterFilePath==null) {
-            letterFilePath = "Java/Plagiarism/synonyms/litera_a.txt";
+           // letterFilePath = "Java/Plagiarism/synonyms/litera_a.txt";
             //System.out.println("default file path -> file not found");
+            return null;
         }
 
         return letterFilePath;
